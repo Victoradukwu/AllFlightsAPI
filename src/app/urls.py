@@ -13,6 +13,7 @@ urlpatterns = [
     path('auth/register/', views.register, name='register'),
     path('auth/login/', views.login, name='login'),
     path('countries/', views.CountryListView.as_view(), name='countries'),
-    path('flights/', views.FlightListView.as_view(), name='flights')
+    path('flights/', views.FlightListView.as_view(), name='flights'),
+    path('flights/recommendations/<departure_port>/<departure_date>', views.recommendations, name='recommendations')
 ]
 

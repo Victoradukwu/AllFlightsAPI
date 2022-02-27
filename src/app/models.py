@@ -104,7 +104,8 @@ class Flight(TimeStampedModel):
     INACTIVE = 'Inactive'
     STATUS_CHOICES = [(ACTIVE, ACTIVE), (INACTIVE, INACTIVE)]
 
-    departure_time = models.DateTimeField()
+    departure_time = models.TimeField()
+    departure_date = models.DateField()
     departure_port = models.ForeignKey('Airport', related_name='outbound_flights', on_delete=models.CASCADE)
     destination_port = models.ForeignKey('Airport', related_name='inbound_flights', on_delete=models.CASCADE)
     duration = models.FloatField(help_text='Estimated number of hours in flight')
