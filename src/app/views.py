@@ -4,6 +4,7 @@ from django.contrib.auth.models import Group, Permission
 from django.views.decorators.csrf import csrf_exempt
 from drf_yasg.openapi import Parameter, IN_QUERY
 from drf_yasg.utils import swagger_auto_schema
+import requests
 from rest_framework import filters
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -170,6 +171,22 @@ def assign_roles_to_user(request, pk):
     else:
         user.groups.remove(*ids)
     return Response({'detail': 'Successful'})
+
+
+@api_view(http_method_names=['GET'])
+@permission_classes([AllowAny])
+def recommendations(request, departure_port, departure_date):
+
+    url = f'http://127.0.0.1:8100/{departure_port}/{departure_date}'
+    resp = requests.get(url)
+    if resp.ok:
+        data = resp.json()
+        for flt in data:
+            flt['carrier_name'] = Flight.objects.get(id=flt.get('id')).carrier.name
+    else:
+        print(resp.json())
+        data = 'There is an error'
+    return Response({'detail': data})
 
 
 class FlightListView(ListCreateAPIView):

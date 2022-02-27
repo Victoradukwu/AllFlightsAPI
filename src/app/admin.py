@@ -70,6 +70,7 @@ class AppUserAdmin(UserAdmin):
 @admin.register(Flight)
 class FlightAdmin(admin.ModelAdmin):
     list_display = [
+        'departure_date',
         'departure_time',
         'departure_port',
         'destination_port',
@@ -79,7 +80,7 @@ class FlightAdmin(admin.ModelAdmin):
         'status',
         'capacity'
     ]
-    search_fields = ['departure_time', 'departure_port', 'destination_port', 'flight_number']
+    search_fields = ['departure_date', 'departure_time', 'departure_port', 'destination_port', 'flight_number']
     ordering = ["-created"]
     list_filter = ['departure_port', 'destination_port']
 

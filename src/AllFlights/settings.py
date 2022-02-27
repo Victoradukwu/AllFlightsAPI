@@ -58,11 +58,20 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_PARSER_CLASSES": [
+            'djangorestframework_camel_case.parser.CamelCaseFormParser',
+            'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
+            'djangorestframework_camel_case.parser.CamelCaseJSONParser',
             "rest_framework.parsers.JSONParser",
             "rest_framework.parsers.FormParser",
             "rest_framework.parsers.MultiPartParser",
         ],
-    'EXCEPTION_HANDLER': 'app.exception_handler.custom_exception_handler',
+    'DEFAULT_RENDERER_CLASSES': [
+            'djangorestframework_camel_case.render.CamelCaseJSONRenderer',
+            'djangorestframework_camel_case.render.CamelCaseBrowsableAPIRenderer',
+            'rest_framework.renderers.JSONRenderer',
+            'rest_framework.renderers.BrowsableAPIRenderer',
+        ],
+    # 'EXCEPTION_HANDLER': 'app.exception_handler.custom_exception_handler',
 }
 
 ROOT_URLCONF = 'AllFlights.urls'
