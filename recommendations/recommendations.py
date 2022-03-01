@@ -6,10 +6,19 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
 
 def db_connection():
+    """
+    A function to return a connection to the database
+    Returns
+    -------
+    connection:
+        A database connection object
+
+    """
     db_name = os.getenv('POSTGRES_DB')
     db_host = os.getenv('POSTGRES_HOST')
     db_user = os.getenv('POSTGRES_USER')
@@ -19,6 +28,19 @@ def db_connection():
 
 
 def query_db(port, date):
+    """Queries the database and returns
+
+    Parameters
+    ----------
+    port : str
+        the primary key of the departure port
+    date : str
+        string representation of the flight departure date
+
+    Returns
+    -------
+
+    """
     date_ = f"'{date}'"
     query_string = f'SELECT * FROM app_flight WHERE app_flight.departure_port_id = {port} AND app_flight.departure_date = DATE {date_};'
     with db_connection().cursor(cursor_factory=RealDictCursor) as cur:
@@ -30,7 +52,15 @@ def query_db(port, date):
 
 
 class ServerHandler(SimpleHTTPRequestHandler):
+    """ A class that implements handlers for various operations of the HTTP server"""
     def do_GET(self):
+        """
+        implements the GET operation of the HTTP server
+
+        Returns
+        -------
+        None
+        """
         path_params = self.path[1:].split('/')
         self.send_response(200)
         self.send_header('Content-Type', 'application/json')
@@ -40,7 +70,22 @@ class ServerHandler(SimpleHTTPRequestHandler):
 
 
 def server(server_class=HTTPServer, handler_class=ServerHandler):
-    server_address = ('127.0.0.1', 8100)
+    """Creates a http server
+
+    Parameters
+    ----------
+    server_class :
+        The HTTPServer class used to instantiate the server
+    handler_class :
+        The class that implements handling of the http request methods
+
+    Returns
+    -------
+    None
+
+    """
+    recommendations_host = os.getenv('RECOMMENDATIONS_HOST', 'localhost')
+    server_address = (recommendations_host, 8100)
     httpd = server_class(server_address, handler_class)
     httpd.serve_forever()
 
