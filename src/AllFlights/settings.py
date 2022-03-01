@@ -110,7 +110,7 @@ AUTH_PASSWORD_VALIDATORS = []
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Lagos'
 
 USE_I18N = True
 
@@ -129,7 +129,7 @@ STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 ]
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 MEDIA_URL = '/uploads/'
 

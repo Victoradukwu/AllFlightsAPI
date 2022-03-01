@@ -18,9 +18,9 @@ else
     # Start Gunicorn processes
     echo Starting Gunicorn
 
-    exec gunicorn RecipeHubAPI.wsgi \
+    exec gunicorn AllFlights.wsgi \
         --bind 0.0.0.0:8000 \
-        --chdir /usr/src/app \
+        --chdir /service/src \
         --workers 1 \
         --reload \
         --log-level=info \

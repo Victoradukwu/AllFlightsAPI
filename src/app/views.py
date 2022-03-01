@@ -1,3 +1,5 @@
+import os
+
 import django_filters
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import Group, Permission
@@ -65,6 +67,13 @@ def login(request):
 
 
 class RoleListView(ListCreateAPIView):
+    """
+       get:
+       Return a list of role objects
+
+       post:
+       creates a new role object
+    """
     serializer_class = serializers.GroupSerializer
     permission_classes = [IsAdminUser]
     pagination_class = PageSizeAndNumberPagination
@@ -77,6 +86,22 @@ class RoleListView(ListCreateAPIView):
 
 
 class RoleDetailView(RetrieveUpdateDestroyAPIView):
+    """
+    get:
+    Return the details of a single role
+
+    put:
+    Updates a given role, non-partial update
+
+    patch:
+    Updates a given role, partial update
+
+
+
+    delete:
+    Deletes a single role
+    """
+
     permission_classes = [IsAdminUser]
     serializer_class = serializers.GroupSerializer
 
@@ -85,11 +110,19 @@ class RoleDetailView(RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         id_ = self.kwargs.get('pk')
-        recipe = Group.objects.get(id=id_)
-        return recipe
+        group = Group.objects.get(id=id_)
+        return group
 
 
 class PermissionListView(ListCreateAPIView):
+    """
+       get:
+       Return a list of permission objects
+
+       post:
+       creates a new permission object
+    """
+
     serializer_class = serializers.PermissionSerializer
     permission_classes = [IsAdminUser]
     pagination_class = PageSizeAndNumberPagination
@@ -102,6 +135,20 @@ class PermissionListView(ListCreateAPIView):
 
 
 class PermissionDetailView(RetrieveUpdateDestroyAPIView):
+    """
+        get:
+        Return the details of a permission flight
+
+        put:
+        Updates a given permission, non-partial update
+
+        patch:
+        Updates a given permission, partial update
+
+
+        delete:
+        Deletes a single permission
+    """
     permission_classes = [IsAdminUser]
     serializer_class = serializers.PermissionSerializer
 
@@ -110,11 +157,16 @@ class PermissionDetailView(RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         id_ = self.kwargs.get('pk')
-        recipe = Permission.objects.get(id=id_)
-        return recipe
+        permission = Permission.objects.get(id=id_)
+        return permission
 
 
 class CountryListView(ListAPIView):
+    """
+       get:
+       Return a list of country objects
+
+    """
     permission_classes = [IsAdminUser]
     serializer_class = serializers.CountrySerializer
 
@@ -126,6 +178,22 @@ class CountryListView(ListAPIView):
 @api_view(http_method_names=['POST'])
 @permission_classes([IsAdminUser])
 def assign_permissions_to_user(request, pk):
+    """
+
+    Parameters
+    ----------
+    request : Request
+        DRF Request object
+    pk : str
+        the primary key of the user to assign permission
+
+    Returns
+    -------
+    Response
+        DRF Response object conveying result of the operation
+
+    """
+
 
     operation = request.query_params.get('operation')
     user = User.objects.get(pk=pk)
@@ -176,8 +244,8 @@ def assign_roles_to_user(request, pk):
 @api_view(http_method_names=['GET'])
 @permission_classes([AllowAny])
 def recommendations(request, departure_port, departure_date):
-
-    url = f'http://127.0.0.1:8100/{departure_port}/{departure_date}'
+    recommendations_host = os.getenv('RECOMMENDATIONS_HOST', 'localhost')
+    url = f'http://{recommendations_host}:8100/{departure_port}/{departure_date}'
     resp = requests.get(url)
     if resp.ok:
         data = resp.json()
@@ -190,8 +258,45 @@ def recommendations(request, departure_port, departure_date):
 
 
 class FlightListView(ListCreateAPIView):
+    """
+       get:
+       Return a list of flight objects
+
+       post:
+       creates a new flight object
+   """
+
     permission_classes = [IsAdminUser]
     serializer_class = serializers.FlightSerializer
 
     def get_queryset(self):
         return Flight.objects.all()
+
+
+class FlightDetailView(RetrieveUpdateDestroyAPIView):
+    """
+    get:
+    Return the details of a single flight
+
+    put:
+    Updates a given flight, non-partial update
+
+    patch:
+    Updates a given flight, partial update
+
+
+
+    delete:
+    Deletes a single flight
+    """
+
+    permission_classes = [IsAdminUser]
+    serializer_class = serializers.FlightSerializer
+
+    def get_queryset(self):
+        return Flight.objects.all()
+
+    def get_object(self):
+        id_ = self.kwargs.get('pk')
+        flight = Flight.objects.get(id=id_)
+        return flight
