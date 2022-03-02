@@ -8,11 +8,6 @@ from django.conf.urls.static import static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.conf import settings
 
-environment = os.getenv('ENVIRONMENT')
-swagger_host_url_mapping = {
-    'development': 'http://127.0.0.1:8000',
-    'staging': 'https://allflights.com'
-}
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -24,7 +19,6 @@ schema_view = get_schema_view(
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),
-    url=os.getenv('SWAGGER_DEFAULT_API_URL', swagger_host_url_mapping.get(environment))
 )
 
 urlpatterns = [
