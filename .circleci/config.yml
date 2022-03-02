@@ -1,0 +1,42 @@
+version: 2.1
+
+orbs:
+  aws-cli: circleci/aws-cli@2.0.6
+  python: circleci/python@1.5.0
+  aws-ecr: circleci/aws-ecr@7.3.0
+
+jobs:
+  deploy:
+    docker:
+      - image: cimg/python:3.8
+    steps:
+      - run:
+          name: AWS Deployment
+          command: |
+            ssh -o StrictHostKeyChecking=no ubuntu@$EC2_PUBLIC_IP "cd allflights && aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_ID && docker pull $ECR_ID/$ALLFLIGHTS_REPO:latest && docker pull $ECR_ID/$RECOMMENDATIONS_REPO:latest && docker-compose up -d"
+
+workflows:
+  main_workflow:
+    jobs:
+      - python/test:
+          test-tool: pytest
+      - aws-ecr/build-and-push-image:
+          name: "allflights_build"
+          repo: $ALLFLIGHTS_REPO
+          path: "src/"
+          requires:
+            - python/test
+      - aws-ecr/build-and-push-image:
+          name: "recommendations_build"
+          repo: $RECOMMENDATIONS_REPO
+          path: "recommendations/"
+          requires:
+            - python/test
+      - deploy:
+          requires:
+            - allflights_build
+            - recommendations_build
+          filters:
+            branches:
+              only: staging
+

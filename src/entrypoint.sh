@@ -22,6 +22,7 @@ else
         --bind 0.0.0.0:8000 \
         --chdir /service/src \
         --workers 1 \
+        --timeout 120 \
         --reload \
         --log-level=info \
         --log-file=/srv/logs/gunicorn.log \
