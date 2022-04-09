@@ -1,11 +1,12 @@
 import os
 from pathlib import Path
 
+import django_heroku
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY')
-
 
 DEBUG = os.getenv('DEBUG')
 
@@ -23,8 +24,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'app',
-
-# Third party apps
     'drf_yasg',
     'rest_framework',
     'rest_framework.authtoken',
@@ -79,8 +78,7 @@ ROOT_URLCONF = 'AllFlights.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -184,3 +182,5 @@ SWAGGER_SETTINGS = {
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+django_heroku.settings(locals())
