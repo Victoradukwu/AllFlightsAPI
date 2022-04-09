@@ -24,12 +24,18 @@ workflows:
           name: "allflights_build"
           repo: $ALLFLIGHTS_REPO
           path: "src/"
+          filters:
+            branches:
+              only: master
           requires:
             - python/test
       - aws-ecr/build-and-push-image:
           name: "recommendations_build"
           repo: $RECOMMENDATIONS_REPO
           path: "recommendations/"
+          filters:
+            branches:
+              only: master
           requires:
             - python/test
       - deploy:
@@ -38,5 +44,5 @@ workflows:
             - recommendations_build
           filters:
             branches:
-              only: staging
+              only: master
 
