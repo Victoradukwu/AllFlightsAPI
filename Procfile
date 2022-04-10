@@ -1,1 +1,1 @@
-web: gunicorn src.AllFlights.wsgi
+web: gunicorn --pythonpath src.AllFlights src.AllFlights.wsgi
