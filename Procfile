@@ -1,1 +1,1 @@
-web: gunicorn --pythonpath src.AllFlights src.AllFlights.wsgi
+web: gunicorn --chdir src AllFlights.wsgi
