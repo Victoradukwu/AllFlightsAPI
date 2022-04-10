@@ -1,1 +1,1 @@
-./src/Procfile
+web: gunicorn src.AllFlights.wsgi
