@@ -1,1 +1,1 @@
-web: gunicorn src.AllFlights.wsgi
+web: gunicorn --chdir src AllFlights.wsgi
