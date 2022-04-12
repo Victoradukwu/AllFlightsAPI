@@ -23,10 +23,22 @@ class GroupSerializer(serializers.ModelSerializer):
 
 
 class PermissionAssignSerializer(serializers.Serializer):
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
+        pass
+
     permission_ids = serializers.ListField(child=serializers.IntegerField())
 
 
 class RoleAssignSerializer(serializers.Serializer):
+    def update(self, instance, validated_data):
+        pass
+
+    def create(self, validated_data):
+        pass
+
     role_ids = serializers.ListField(child=serializers.IntegerField())
 
 
@@ -52,11 +64,20 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserTokenSerializer(serializers.Serializer):
+    def update(self, instance, validated_data):
+        pass
+
+    def create(self, validated_data):
+        pass
+
     user = UserSerializer()
     access_token = serializers.CharField(required=True)
 
 
 class RegisterSerializer(serializers.Serializer):
+    def update(self, instance, validated_data):
+        pass
+
     role = serializers.CharField(required=False)
     email = serializers.EmailField()
     phone_number = serializers.CharField()
@@ -74,8 +95,6 @@ class RegisterSerializer(serializers.Serializer):
     def validate(self, attrs):
         if attrs.get('password') != attrs.get('confirm_password'):
             raise ValidationError('Password and Confirm password must be the same.')
-        if 'state' in attrs:
-            attrs['state'] = app_models.State.objects.get(pk=attrs.pop('state'))
         if 'country' in attrs:
             attrs['country'] = app_models.Country.objects.get(pk=attrs.pop('country'))
         super().validate(attrs)
@@ -93,6 +112,12 @@ class RegisterSerializer(serializers.Serializer):
 
 
 class LoginSerializer(serializers.Serializer):
+    def update(self, instance, validated_data):
+        pass
+
+    def create(self, validated_data):
+        pass
+
     email = serializers.CharField(required=False)
     phone_number = serializers.CharField(required=False)
     password = serializers.CharField(required=True)

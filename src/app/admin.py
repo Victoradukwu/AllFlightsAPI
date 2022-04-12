@@ -3,6 +3,7 @@ from django.contrib.auth.admin import UserAdmin as UserAdmin
 from .forms import UserCreationForm, UserChangeForm
 from .models import User, Seat, Flight, Airport, Carrier, Ticket
 
+
 @admin.register(User)
 class AppUserAdmin(UserAdmin):
     form = UserChangeForm

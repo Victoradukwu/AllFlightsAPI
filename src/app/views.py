@@ -273,8 +273,6 @@ class FlightDetailView(RetrieveUpdateDestroyAPIView):
     patch:
     Updates a given flight, partial update
 
-
-
     delete:
     Deletes a single flight
     """

@@ -15,4 +15,3 @@ urlpatterns = [
     path('flights/', views.FlightListView.as_view(), name='flights'),
     path('flights/recommendations/<departure_port>/<departure_date>', views.recommendations, name='recommendations')
 ]
-
