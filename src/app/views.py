@@ -4,7 +4,6 @@ import django_filters
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import Group, Permission
 from django.views.decorators.csrf import csrf_exempt
-from drf_yasg.openapi import Parameter, IN_QUERY
 from drf_yasg.utils import swagger_auto_schema
 import requests
 from rest_framework import filters
@@ -18,6 +17,7 @@ from rest_framework.response import Response
 
 from .models import User, Country, Flight
 from . import serializers
+from . import docs
 
 
 class PageSizeAndNumberPagination(PageNumberPagination):
@@ -174,62 +174,49 @@ class CountryListView(ListAPIView):
         return Country.objects.all()
 
 
-@swagger_auto_schema(method='post', request_body=serializers.PermissionAssignSerializer, manual_parameters=[Parameter('operation', IN_QUERY, type='string')])
+@swagger_auto_schema(**docs.user_permission)
 @api_view(http_method_names=['POST'])
-@permission_classes([IsAdminUser])
-def assign_permissions_to_user(request, pk):
+@permission_classes([AllowAny])
+def assign_permissions(request, principal, operation, id):
     """
 
     Parameters
     ----------
-    request : Request
-        DRF Request object
-    pk : str
-        the primary key of the user to assign permission
-
-    Returns
-    -------
-    Response
-        DRF Response object conveying result of the operation
+    id : str
+        the primary key of the user or role to assign permission
+    principal : str
+        the type of entity to assign or remove permissions ['user' or 'group']
+    operation : str
+        the type of operation to carry out on the permissions ['add' or 'remove']
 
     """
-
-
-    operation = request.query_params.get('operation')
-    user = User.objects.get(pk=pk)
     serializer = serializers.PermissionAssignSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     ids = serializer.validated_data.get('permission_ids')
+
     if operation == 'add':
-        user.user_permissions.add(*ids)
+        if principal == 'user':
+            user = User.objects.get(pk=id)
+            user.user_permissions.add(*ids)
+        else:
+            role = Group.objects.get(pk=id)
+            role.permissions.add(*ids)
+
     else:
-        user.user_permissions.remove(*ids)
+        if principal == 'user':
+            user = User.objects.get(pk=id)
+            user.user_permissions.remove(*ids)
+        else:
+            role = Group.objects.get(pk=id)
+            role.permissions.remove(*ids)
     return Response({'detail': 'Successful'})
 
 
-@swagger_auto_schema(method='post', request_body=serializers.PermissionAssignSerializer, manual_parameters=[Parameter('operation', IN_QUERY, type='string')])
+@swagger_auto_schema(method='post', request_body=serializers.RoleAssignSerializer)
 @api_view(http_method_names=['POST'])
 @permission_classes([IsAdminUser])
-def assign_permissions_to_group(request, pk):
+def assign_roles_to_user(request, pk, operation):
 
-    operation = request.query_params.get('operation')
-    role = Group.objects.get(pk=pk)
-    serializer = serializers.PermissionAssignSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    ids = serializer.validated_data.get('permission_ids')
-    if operation == 'add':
-        role.permissions.add(*ids)
-    else:
-        role.permissions.remove(*ids)
-    return Response({'detail': 'Successful'})
-
-
-@swagger_auto_schema(method='post', request_body=serializers.RoleAssignSerializer, manual_parameters=[Parameter('operation', IN_QUERY, type='string')])
-@api_view(http_method_names=['POST'])
-@permission_classes([IsAdminUser])
-def assign_roles_to_user(request, pk):
-
-    operation = request.query_params.get('operation')
     user = User.objects.get(pk=pk)
     serializer = serializers.RoleAssignSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -244,17 +231,19 @@ def assign_roles_to_user(request, pk):
 @api_view(http_method_names=['GET'])
 @permission_classes([AllowAny])
 def recommendations(request, departure_port, departure_date):
-    recommendations_host = os.getenv('RECOMMENDATIONS_HOST', 'localhost')
-    url = f'http://{recommendations_host}:8100/{departure_port}/{departure_date}'
-    resp = requests.get(url)
-    if resp.ok:
-        data = resp.json()
-        for flt in data:
-            flt['carrier_name'] = Flight.objects.get(id=flt.get('id')).carrier.name
-    else:
-        print(resp.json())
-        data = 'There is an error'
-    return Response({'detail': data})
+    # recommendations_host = os.getenv('RECOMMENDATIONS_HOST', 'localhost')
+    # url = f'http://{recommendations_host}:8100/{departure_port}/{departure_date}'
+    # resp = requests.get(url)
+    # if resp.ok:
+    #     data = resp.json()
+    #     for flt in data:
+    #         flt['carrier_name'] = Flight.objects.get(id=flt.get('id')).carrier.name
+    # else:
+    #     print(resp.json())
+    #     data = 'There is an error'
+    # return Response({'detail': data})
+    flights = Flight.objects.filter(departure_port=departure_port, departure_date=departure_date)
+    return Response(serializers.FlightSerializer(flights, many=True).data)
 
 
 class FlightListView(ListCreateAPIView):
