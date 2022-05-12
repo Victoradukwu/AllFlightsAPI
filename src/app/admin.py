@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as UserAdmin
 from .forms import UserCreationForm, UserChangeForm
-from .models import User, Seat, Flight, Airport, Carrier, Ticket
+from .models import User, Seat, Flight, Airport, Carrier, Ticket, PasswordResetToken
 
 
 @admin.register(User)
@@ -116,3 +116,11 @@ class TicketAdmin(admin.ModelAdmin):
     search_fields = ['ticket_number', 'first_name', 'last_name', 'email', 'phone', 'flight', 'seat']
     ordering = ["-created"]
     list_filter = ['flight']
+
+
+@admin.register(PasswordResetToken)
+class TicketAdmin(admin.ModelAdmin):
+    list_display = ['key', 'status', 'user']
+    search_fields = ['user__first_name', 'user__last_name', 'key']
+    ordering = ["-created"]
+    list_filter = ['user']

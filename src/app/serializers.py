@@ -129,3 +129,50 @@ class FlightSerializer(serializers.ModelSerializer):
     class Meta:
         model = app_models.Flight
         exclude = ['modified', 'created']
+
+
+class PasswordResetSerializer(serializers.Serializer):
+
+    token = serializers.CharField(required=False)
+    email = serializers.EmailField()
+    password = serializers.CharField()
+    confirm_password = serializers.CharField()
+
+    def validate(self, attrs):
+        if attrs.get('password') != attrs.get('confirm_password'):
+            raise ValidationError('Password and Confirm password must be the same.')
+        super().validate(attrs)
+        return attrs
+
+    def save(self, validated_data):
+        email = validated_data.get('email')
+        password = validated_data.get('password')
+        token = validated_data.get('token')
+        try:
+            user = app_models.User.objects.get(email=email)
+        except Exception:
+            raise ValidationError('Password reset is not successful. Incorrect email.')
+
+        if app_models.PasswordResetToken.objects.filter(user=user, key=token, status='Active').exists():
+            user.set_password(password)
+            user.save()
+            app_models.PasswordResetToken.objects.filter(user=user, key=token).update(status='Inactive')
+
+
+class PasswordChangeSerializer(serializers.Serializer):
+
+    password = serializers.CharField()
+    confirm_password = serializers.CharField()
+
+    def validate(self, attrs):
+        if attrs.get('password') != attrs.get('confirm_password'):
+            raise ValidationError('Password and Confirm password must be the same.')
+        super().validate(attrs)
+        return attrs
+
+    def save(self, validated_data):
+        password = validated_data.get('password')
+        request = self.context.get('request')
+        user = request.user
+        user.set_password(password)
+        user.save()

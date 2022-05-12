@@ -108,7 +108,7 @@ class Flight(TimeStampedModel):
     departure_date = models.DateField()
     departure_port = models.ForeignKey('Airport', related_name='outbound_flights', on_delete=models.CASCADE)
     destination_port = models.ForeignKey('Airport', related_name='inbound_flights', on_delete=models.CASCADE)
-    duration = models.FloatField(help_text='Estimated number of hours in flight')
+    duration = models.DurationField(help_text='Estimated duration of flight', null=True)
     fare = models.DecimalField(max_digits=6, decimal_places=2)
     flight_number = models.CharField(max_length=20, null=True, blank=True, unique=True)
     status = models.CharField(max_length=8, choices=STATUS_CHOICES, default=ACTIVE)
@@ -164,3 +164,9 @@ class Ticket(TimeStampedModel):
             self.ticket_number = services.generate_ticket_number(self.flight)
 
         super().save(*args, **kwargs)
+
+
+class PasswordResetToken(TimeStampedModel):
+    key = models.CharField(max_length=100, unique=True)
+    status = models.CharField(max_length=10)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reset_tokens')
