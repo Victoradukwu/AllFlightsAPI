@@ -164,3 +164,9 @@ class Ticket(TimeStampedModel):
             self.ticket_number = services.generate_ticket_number(self.flight)
 
         super().save(*args, **kwargs)
+
+
+class PasswordResetToken(TimeStampedModel):
+    key = models.CharField(max_length=100, unique=True)
+    status = models.CharField(max_length=10)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reset_tokens')

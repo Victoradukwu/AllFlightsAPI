@@ -1,4 +1,4 @@
-import os
+import os, uuid
 
 import django_filters
 from django.contrib.auth import authenticate
@@ -12,12 +12,11 @@ from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny, IsAdminUser
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
-from .models import User, Country, Flight
-from . import serializers
-from . import docs
+from .models import User, Country, Flight, PasswordResetToken
+from . import serializers, docs, utils
 
 
 class PageSizeAndNumberPagination(PageNumberPagination):
@@ -64,6 +63,56 @@ def login(request):
     data = {"user": user, "access_token": token.key}
 
     return Response(serializers.UserTokenSerializer(data).data, status=status.HTTP_200_OK)
+
+
+@api_view()
+@permission_classes([AllowAny])
+def initiate_password_reset(request, email):
+    user = User.objects.filter(email=email).first()
+    if user:
+        token = uuid.uuid4().hex
+        PasswordResetToken.objects.create(user=user, key=token, status='Active')
+
+        email_body = f'<html>' \
+                     f'<head>' \
+                     f'</head>' \
+                     f'<body>' \
+                     f'<p>Hi {user.first_name},</p>' \
+                     f'<p>You requested for a password reset on <b>Allflights</b></p>' \
+                     f'<p>Kindly click on the link below to reset your password</p>' \
+                     f'<a href="https:www.allflights.com/auth/password-reset/{token}">Reset password</a>' \
+                     f'</body>' \
+                     f'</html>'
+
+        payload = {
+            'subject': 'Password Reset',
+            'html_content': email_body,
+            'to_email': user.email
+        }
+        utils.send_email(payload)
+    return Response({'detail': 'Check your email'})
+
+
+@swagger_auto_schema(method='post', request_body=serializers.PasswordResetSerializer)
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def complete_password_reset(request):
+    serializer = serializers.PasswordResetSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    serializer.save(serializer.validated_data)
+    return Response({'detail': 'Password reset successful'})
+
+
+@swagger_auto_schema(method='post', request_body=serializers.PasswordChangeSerializer)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    serializer = serializers.PasswordChangeSerializer(data=request.data, context={'request': request})
+    serializer.is_valid(raise_exception=True)
+
+    serializer.save(serializer.validated_data)
+    return Response({'detail': 'Password change successful'})
 
 
 class RoleListView(ListCreateAPIView):
