@@ -111,7 +111,10 @@ def change_password(request):
     serializer = serializers.PasswordChangeSerializer(data=request.data, context={'request': request})
     serializer.is_valid(raise_exception=True)
 
-    serializer.save(serializer.validated_data)
+    try:
+        serializer.save(serializer.validated_data)
+    except ValueError as exc:
+        return Response({'detail': str(exc)})
     return Response({'detail': 'Password change successful'})
 
 
