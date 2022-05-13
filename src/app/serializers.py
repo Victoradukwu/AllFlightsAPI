@@ -163,6 +163,7 @@ class PasswordChangeSerializer(serializers.Serializer):
 
     password = serializers.CharField()
     confirm_password = serializers.CharField()
+    old_password = serializers.CharField()
 
     def validate(self, attrs):
         if attrs.get('password') != attrs.get('confirm_password'):
@@ -172,7 +173,11 @@ class PasswordChangeSerializer(serializers.Serializer):
 
     def save(self, validated_data):
         password = validated_data.get('password')
+        old_password = validated_data.get('old_password')
         request = self.context.get('request')
         user = request.user
-        user.set_password(password)
-        user.save()
+        if user.check_password(old_password):
+            user.set_password(password)
+            user.save()
+        else:
+            raise ValueError('Old password is incorrect')
