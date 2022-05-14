@@ -6,14 +6,17 @@ from django.contrib.auth.models import Group, Permission
 from django.views.decorators.csrf import csrf_exempt
 from drf_yasg.utils import swagger_auto_schema
 import requests
+from requests import HTTPError
 from rest_framework import filters
 from rest_framework import status
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.parsers import FormParser
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
+from social_django.utils import psa
 
 from .models import User, Country, Flight, PasswordResetToken
 from . import serializers, docs, utils
@@ -339,3 +342,52 @@ class FlightDetailView(RetrieveUpdateDestroyAPIView):
         id_ = self.kwargs.get('pk')
         flight = Flight.objects.get(id=id_)
         return flight
+
+
+@swagger_auto_schema(method='post', request_body=serializers.SocialSerializer)
+@api_view(http_method_names=['POST'])
+@parser_classes([FormParser])
+@psa()
+def exchange_token(request, backend):
+    """
+
+       Parameters
+       ----------
+       request : DRF request
+            Instance of DRF request object
+       backend : str
+           the social authentication backend in use. Choices are: [facebook, google-oauth2]
+
+       """
+    serializer = serializers.SocialSerializer(data=request.data)
+    if serializer.is_valid(raise_exception=True):
+        try:
+            user = request.backend.do_auth(serializer.validated_data['access_token'])
+        except HTTPError as e:
+            return Response(
+                {'errors': {
+                    'token': 'Invalid token',
+                    'detail': str(e),
+                }},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not user:
+            return Response(
+                {'errors': {'non_field_errors': "Authentication Failed"}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if user.is_active:
+            token, _ = Token.objects.get_or_create(user=user)
+            payload = {
+                'message': "Successfully logged in",
+                'token': token.key,
+                'data': serializers.UserSerializer(user).data
+            }
+            payload['data']['isStaff'] = user.is_staff
+            return Response(payload, status=status.HTTP_200_OK)
+        else:
+            return Response(
+                {'errors': {'non_field_errors': 'This user account is inactive'}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )

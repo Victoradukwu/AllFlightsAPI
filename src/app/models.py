@@ -45,14 +45,14 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
 
-    username = None
+    username = models.CharField(max_length=100, null=True, blank=True)
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True, unique=True)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     avatar = VersatileImageField('guardian_avatar', null=True, blank=True, upload_to=path_and_filename)
     country = models.ForeignKey('Country', on_delete=models.SET_NULL, null=True)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
 
@@ -63,18 +63,6 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
-
-    def has_perm(self, perm, obj=None):
-        """
-        Check if the user has a specific permission
-        """
-        return True
-
-    def has_module_perms(self, app_label):
-        """
-        Check if a user has permissions to view the app `app_label`
-        """
-        return True
 
     @property
     def full_name(self):
