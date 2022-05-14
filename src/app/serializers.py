@@ -181,3 +181,20 @@ class PasswordChangeSerializer(serializers.Serializer):
             user.save()
         else:
             raise ValueError('Old password is incorrect')
+
+
+class SocialSerializer(serializers.Serializer):
+    """
+    This serializer accepts and validates an externally generated OAuth2 access token.
+    """
+
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
+        pass
+
+    access_token = serializers.CharField(
+        allow_blank=False,
+        trim_whitespace=True
+    )

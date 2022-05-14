@@ -16,6 +16,7 @@ class AppUserAdmin(UserAdmin):
         'first_name',
         'last_name',
         'phone_number',
+        'username',
         'email',
         'country',
     )

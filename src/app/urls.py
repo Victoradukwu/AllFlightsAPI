@@ -14,6 +14,7 @@ urlpatterns = [
     path('auth/initiate-password-reset/<email>/', views.initiate_password_reset, name='reset_init'),
     path('auth/complete-password-reset/', views.complete_password_reset, name='reset_complete'),
     path('auth/change-password/', views.change_password, name='change_complete'),
+    path('auth/social/<backend>/', views.exchange_token, name='social_auth'),
     path('countries/', views.CountryListView.as_view(), name='countries'),
     path('flights/', views.FlightListView.as_view(), name='flights'),
     path('flights/recommendations/<departure_port>/<departure_date>', views.recommendations, name='recommendations')
