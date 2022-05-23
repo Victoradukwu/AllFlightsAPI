@@ -3,6 +3,7 @@ from django.contrib.auth.models import Group, Permission
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
 from . import models as app_models
@@ -125,10 +126,58 @@ class LoginSerializer(serializers.Serializer):
 
 class FlightSerializer(serializers.ModelSerializer):
     carrier_name = serializers.ReadOnlyField(source='carrier.name')
+    economy_capacity = serializers.IntegerField(write_only=True)
+    premium_capacity = serializers.IntegerField(write_only=True)
+    business_capacity = serializers.IntegerField(write_only=True)
+    economy_fare = serializers.DecimalField(max_digits=10, decimal_places=2, write_only=True)
+    premium_fare = serializers.DecimalField(max_digits=10, decimal_places=2, write_only=True)
+    business_fare = serializers.DecimalField(max_digits=10, decimal_places=2, write_only=True)
 
     class Meta:
         model = app_models.Flight
         exclude = ['modified', 'created']
+        read_only_fields = ['flight_number']
+
+    def create(self, validated_data):
+        flight_dict = {key: validated_data[key] for key in [
+            "departure_time",
+            "departure_date",
+            "departure_port",
+            "destination_port",
+            "duration",
+            "carrier"
+        ]}
+        flight = app_models.Flight.objects.create(**flight_dict)
+
+        economy_class = app_models.FlightClass.objects.create(
+            flight=flight,
+            class_name=app_models.FlightClass.ECONOMY,
+            capacity=validated_data.get('economy_capacity'),
+            fare=validated_data.get('economy_fare'),
+        )
+
+        for _ in range(economy_class.capacity):
+            app_models.Seat.objects.create(flight_class=economy_class)
+
+        premium_class = app_models.FlightClass.objects.create(
+            flight=flight,
+            class_name=app_models.FlightClass.PREMIUM,
+            capacity=validated_data.get('premium_capacity'),
+            fare=validated_data.get('premium_fare'),
+        )
+        for _ in range(premium_class.capacity):
+            app_models.Seat.objects.create(flight_class=premium_class)
+
+        business_class = app_models.FlightClass.objects.create(
+            flight=flight,
+            class_name=app_models.FlightClass.BUSINESS,
+            capacity=validated_data.get('business_capacity'),
+            fare=validated_data.get('business_fare'),
+        )
+        for _ in range(business_class.capacity):
+            app_models.Seat.objects.create(flight_class=business_class)
+
+        return flight
 
 
 class PasswordResetSerializer(serializers.Serializer):
