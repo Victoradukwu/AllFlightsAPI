@@ -84,7 +84,7 @@ class Carrier(TimeStampedModel):
     country = models.ForeignKey('Country', related_name='carriers', on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.country}: {self.name}'
+        return self.name
 
 
 class Flight(TimeStampedModel):
@@ -97,14 +97,12 @@ class Flight(TimeStampedModel):
     departure_port = models.ForeignKey('Airport', related_name='outbound_flights', on_delete=models.CASCADE)
     destination_port = models.ForeignKey('Airport', related_name='inbound_flights', on_delete=models.CASCADE)
     duration = models.DurationField(help_text='Estimated duration of flight', null=True)
-    fare = models.DecimalField(max_digits=6, decimal_places=2)
     flight_number = models.CharField(max_length=20, null=True, blank=True, unique=True)
     status = models.CharField(max_length=8, choices=STATUS_CHOICES, default=ACTIVE)
-    capacity = models.IntegerField()
     carrier = models.ForeignKey('Carrier', related_name='flights', on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
-        return f'{self.flight_number}: {self.departure_port.code}_{self.destination_port.code}'
+        return f'{self.flight_number}: {self.carrier.name}'
 
     def save(self, *args, **kwargs):
         if self._state.adding:
@@ -116,21 +114,44 @@ class Flight(TimeStampedModel):
         unique_together = (('flight_number', 'departure_port'),)
 
 
+class FlightClass(TimeStampedModel):
+    """A model class representing a specific seat class on a specific flight"""
+    ECONOMY = 'Economy'
+    PREMIUM = 'Premium'
+    BUSINESS = 'Business'
+    CLASS_CHOICES = [(ECONOMY, ECONOMY), (PREMIUM, PREMIUM), (BUSINESS, BUSINESS)]
+
+    flight = models.ForeignKey(Flight, related_name='classes', on_delete=models.CASCADE)
+    class_name = models.CharField(max_length=10, choices=CLASS_CHOICES, default=ECONOMY)
+    fare = models.DecimalField(max_digits=6, decimal_places=2)
+    capacity = models.IntegerField(default=1)
+
+    def __str__(self):
+        return f"{self.flight.flight_number}-{self.class_name}"
+
+
 class Seat(TimeStampedModel):
     """A model class representing a particular seat on a particular flight"""
     AVAILABLE = 'Available'
     BOOKED = 'Booked'
     STATUS_CHOICES = [(AVAILABLE, AVAILABLE), (BOOKED, BOOKED)]
 
-    seat_number = models.IntegerField()
-    flight = models.ForeignKey(Flight, related_name='seats', on_delete=models.CASCADE)
+    ECONOMY = 'Economy'
+    PREMIUM = 'Premium'
+    BUSINESS = 'Business'
+    CLASS_CHOICES = [(ECONOMY, ECONOMY), (PREMIUM, PREMIUM), (BUSINESS, BUSINESS)]
+
+    seat_number = models.CharField(max_length=20, unique=True)
+    flight_class = models.ForeignKey(FlightClass, related_name='seats', on_delete=models.SET_NULL, null=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=AVAILABLE)
 
     def __str__(self):
-        return f'{self.flight.flight_number}: {self.seat_number}'
+        return f'{self.flight_class.flight.flight_number}: {self.seat_number}'
 
-    class Meta:
-        unique_together = (('seat_number', 'flight'),)
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            self.seat_number = services.generate_seat_number(self)
+        super().save(*args, **kwargs)
 
 
 class Ticket(TimeStampedModel):
@@ -142,10 +163,17 @@ class Ticket(TimeStampedModel):
     phone = models.CharField(max_length=20)
     seat = models.OneToOneField(Seat, on_delete=models.CASCADE)
     ticket_number = models.CharField(max_length=10, null=True, blank=True, unique=True)
-    flight = models.ForeignKey('Flight', on_delete=models.CASCADE, related_name='tickets')
 
     def __str__(self):
-        return f'{self.seat.flight.flight_number}: {self.first_name} {self.last_name}'
+        return f'{self.seat.flight_class.flight.flight_number}: {self.first_name} {self.last_name}'
+
+    @property
+    def flight(self):
+        return str(self.seat.flight_class.flight)
+
+    @property
+    def seat_number(self):
+        return self.seat.seat_number
 
     def save(self, *args, **kwargs):
         if self._state.adding:

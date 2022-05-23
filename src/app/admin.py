@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as UserAdmin
 from .forms import UserCreationForm, UserChangeForm
-from .models import User, Seat, Flight, Airport, Carrier, Ticket, PasswordResetToken
+from .models import User, Seat, Flight, Airport, Carrier, Ticket, PasswordResetToken, FlightClass
 
 
 @admin.register(User)
@@ -77,22 +77,27 @@ class FlightAdmin(admin.ModelAdmin):
         'departure_port',
         'destination_port',
         'duration',
-        'fare',
         'flight_number',
-        'status',
-        'capacity'
+        'status'
     ]
-    search_fields = ['departure_date', 'departure_time', 'departure_port', 'destination_port', 'flight_number']
+    search_fields = [
+        'departure_date',
+        'departure_time',
+        'departure_port__name',
+        'destination_port__name',
+        'flight_number',
+        'carrier__name'
+    ]
     ordering = ["-created"]
-    list_filter = ['departure_port', 'destination_port']
+    list_filter = ['departure_port', 'destination_port', 'carrier']
 
 
 @admin.register(Seat)
 class SeatAdmin(admin.ModelAdmin):
-    list_display = ['seat_number', 'flight', 'status']
-    search_fields = ['seat_number', 'flight', 'status']
+    list_display = ['seat_number', 'flight_class', 'status', 'created', 'modified']
+    search_fields = ['seat_number', 'flight_class__class_name', 'status']
     ordering = ["-created"]
-    list_filter = ['flight', 'status']
+    list_filter = ['flight_class', 'flight_class__flight', 'status']
 
 
 @admin.register(Airport)
@@ -106,7 +111,7 @@ class AirportAdmin(admin.ModelAdmin):
 @admin.register(Carrier)
 class CarrierAdmin(admin.ModelAdmin):
     list_display = ['name', 'country']
-    search_fields = ['name', 'country']
+    search_fields = ['name', 'country__name']
     ordering = ["-created"]
     list_filter = ['country']
 
@@ -114,9 +119,9 @@ class CarrierAdmin(admin.ModelAdmin):
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
     list_display = ['ticket_number', 'first_name', 'last_name', 'email', 'phone', 'flight', 'seat']
-    search_fields = ['ticket_number', 'first_name', 'last_name', 'email', 'phone', 'flight', 'seat']
+    search_fields = ['ticket_number', 'first_name', 'last_name', 'email', 'phone', 'seat__flight_class__flight__flight_number']
     ordering = ["-created"]
-    list_filter = ['flight']
+    list_filter = ['seat__flight_class__flight']
 
 
 @admin.register(PasswordResetToken)
@@ -125,3 +130,10 @@ class TicketAdmin(admin.ModelAdmin):
     search_fields = ['user__first_name', 'user__last_name', 'key']
     ordering = ["-created"]
     list_filter = ['user']
+
+
+@admin.register(FlightClass)
+class FlightClassAdmin(admin.ModelAdmin):
+    list_display = ['flight', 'class_name', 'fare', 'capacity']
+    search_fields = ['flight__carrier__name', 'class_name']
+    list_filter = ['flight', 'class_name']
