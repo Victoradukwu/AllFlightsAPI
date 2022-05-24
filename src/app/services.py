@@ -1,4 +1,7 @@
+from django_filters import rest_framework as filters
 from . import models
+
+
 def generate_flight_number(departure_port):
     last_flight = departure_port.outbound_flights.order_by("-id").first()
     if last_flight:
@@ -26,3 +29,9 @@ def generate_seat_number(seat):
     else:
         last_number = 0
     return f"{seat.flight_class.flight.flight_number}-{last_number + 1}"
+
+
+class FlightFilter(filters.FilterSet):
+    destination = filters.CharFilter(field_name='destination_port__name', lookup_expr='icontains')
+    departure = filters.CharFilter(field_name='departure_port__name', lookup_expr='icontains')
+    departureDate = filters.LookupChoiceFilter(field_name='departure_date', lookup_choices=[('exact', 'On'), ('gte', 'After'), ('lte', 'Before')])
