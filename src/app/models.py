@@ -72,6 +72,7 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
 class Airport(TimeStampedModel):
     name = models.CharField(max_length=100)
     code = models.CharField(max_length=3)
+    city = models.CharField(max_length=20, default='Lagos')
     country = models.ForeignKey('Country', on_delete=models.CASCADE, related_name='airports')
 
     def __str__(self):
