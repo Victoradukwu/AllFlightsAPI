@@ -316,13 +316,6 @@ class FlightListView(ListCreateAPIView):
     def get_queryset(self):
         return Flight.objects.all()
 
-    # def perform_create(self, serializer):
-    #     serializer.save()
-    # def create(self, request, *args, **kwargs):
-    #     serializer = self.serializer_class(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     serializer.save()
-
 
 class FlightDetailView(RetrieveUpdateDestroyAPIView):
     """

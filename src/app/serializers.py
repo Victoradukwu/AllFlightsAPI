@@ -3,7 +3,6 @@ from django.contrib.auth.models import Group, Permission
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
 from . import models as app_models
@@ -124,6 +123,20 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(required=True)
 
 
+class SeatSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = app_models.Seat
+        fields = ['seat_number', 'status']
+
+
+class FlightClassSerializer(serializers.ModelSerializer):
+    seats = SeatSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = app_models.FlightClass
+        fields = ['class_name', 'fare', 'capacity', 'seats']
+
+
 class FlightSerializer(serializers.ModelSerializer):
     carrier_name = serializers.ReadOnlyField(source='carrier.name')
     economy_capacity = serializers.IntegerField(write_only=True)
@@ -132,6 +145,7 @@ class FlightSerializer(serializers.ModelSerializer):
     economy_fare = serializers.DecimalField(max_digits=10, decimal_places=2, write_only=True)
     premium_fare = serializers.DecimalField(max_digits=10, decimal_places=2, write_only=True)
     business_fare = serializers.DecimalField(max_digits=10, decimal_places=2, write_only=True)
+    classes = FlightClassSerializer(many=True, read_only=True)
 
     class Meta:
         model = app_models.Flight
