@@ -6,7 +6,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, Group
 from django.db import models
 from django_extensions.db.models import TimeStampedModel
 from versatileimagefield.fields import VersatileImageField
-from . import services
+from . import utils
 
 
 def path_and_filename(instance, filename):
@@ -107,7 +107,7 @@ class Flight(TimeStampedModel):
 
     def save(self, *args, **kwargs):
         if self._state.adding:
-            self.flight_number = services.generate_flight_number(self.departure_port)
+            self.flight_number = utils.generate_flight_number(self.departure_port)
 
         super().save(*args, **kwargs)
 
@@ -151,7 +151,7 @@ class Seat(TimeStampedModel):
 
     def save(self, *args, **kwargs):
         if self._state.adding:
-            self.seat_number = services.generate_seat_number(self)
+            self.seat_number = utils.generate_seat_number(self)
         super().save(*args, **kwargs)
 
 
@@ -178,7 +178,7 @@ class Ticket(TimeStampedModel):
 
     def save(self, *args, **kwargs):
         if self._state.adding:
-            self.ticket_number = services.generate_ticket_number(self.flight)
+            self.ticket_number = utils.generate_ticket_number(self.flight)
 
         super().save(*args, **kwargs)
 
