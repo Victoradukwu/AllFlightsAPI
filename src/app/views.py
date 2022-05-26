@@ -19,7 +19,7 @@ from rest_framework.response import Response
 from social_django.utils import psa
 
 from .models import User, Country, Flight, PasswordResetToken
-from . import serializers, docs, utils, services
+from . import serializers, docs, utils
 
 
 class PageSizeAndNumberPagination(PageNumberPagination):
@@ -150,8 +150,6 @@ class RoleDetailView(RetrieveUpdateDestroyAPIView):
 
     patch:
     Updates a given role, partial update
-
-
 
     delete:
     Deletes a single role
@@ -312,7 +310,7 @@ class FlightListView(ListCreateAPIView):
 
     permission_classes = [IsAdminUser]
     serializer_class = serializers.FlightSerializer
-    filterset_class = services.FlightFilter
+    filterset_class = utils.FlightFilter
 
     def get_queryset(self):
         return Flight.objects.all()
