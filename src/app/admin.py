@@ -119,7 +119,14 @@ class CarrierAdmin(admin.ModelAdmin):
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
     list_display = ['ticket_number', 'first_name', 'last_name', 'email', 'phone', 'flight', 'seat']
-    search_fields = ['ticket_number', 'first_name', 'last_name', 'email', 'phone', 'seat__flight_class__flight__flight_number']
+    search_fields = [
+        'ticket_number',
+        'first_name',
+        'last_name',
+        'email',
+        'phone',
+        'seat__flight_class__flight__flight_number'
+    ]
     ordering = ["-created"]
     list_filter = ['seat__flight_class__flight']
 

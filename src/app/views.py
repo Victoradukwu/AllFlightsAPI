@@ -1,4 +1,5 @@
-import os, uuid
+import os
+import uuid
 
 import django_filters
 from django.contrib.auth import authenticate
@@ -7,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from drf_yasg.utils import swagger_auto_schema
 import requests
 from requests import HTTPError
-from rest_framework import filters
+from rest_framework import filters, generics
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes, parser_classes
@@ -18,7 +19,7 @@ from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from social_django.utils import psa
 
-from .models import User, Country, Flight, PasswordResetToken
+from .models import User, Country, Flight, PasswordResetToken, Ticket
 from . import serializers, docs, utils
 
 
@@ -230,12 +231,12 @@ class CountryListView(ListAPIView):
 @swagger_auto_schema(**docs.user_permission)
 @api_view(http_method_names=['POST'])
 @permission_classes([AllowAny])
-def assign_permissions(request, principal, operation, id):
+def assign_permissions(request, principal, operation, id_):
     """
 
     Parameters
     ----------
-    id : str
+    id_ : str
         the primary key of the user or role to assign permission
     principal : str
         the type of entity to assign or remove permissions ['user' or 'group']
@@ -249,18 +250,18 @@ def assign_permissions(request, principal, operation, id):
 
     if operation == 'add':
         if principal == 'user':
-            user = User.objects.get(pk=id)
+            user = User.objects.get(pk=id_)
             user.user_permissions.add(*ids)
         else:
-            role = Group.objects.get(pk=id)
+            role = Group.objects.get(pk=id_)
             role.permissions.add(*ids)
 
     else:
         if principal == 'user':
-            user = User.objects.get(pk=id)
+            user = User.objects.get(pk=id_)
             user.user_permissions.remove(*ids)
         else:
-            role = Group.objects.get(pk=id)
+            role = Group.objects.get(pk=id_)
             role.permissions.remove(*ids)
     return Response({'detail': 'Successful'})
 
@@ -390,3 +391,46 @@ def exchange_token(request, backend):
                 {'errors': {'non_field_errors': 'This user account is inactive'}},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+
+class TicketListView(generics.ListCreateAPIView):
+    """A class view for creating and listing all tickets"""
+
+    permission_classes = [utils.IsAdminOrCreateOnly]
+    # filterset_class = TicketFilter
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return serializers.TicketSerializer
+        return serializers.FlightBookingSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return Ticket.objects.all()
+        return Ticket.objects.filter(email=self.request.user.email).order_by('id')
+
+    def get(self, request):
+        tickets = self.get_queryset()
+        return Response({'detail': serializers.TicketSerializer(tickets, many=True).data})
+
+    def post(self, request):
+        """
+            Book flight ticket. Use the following test card details
+
+            "pin": "1111",
+            "number": "507850785078507812",
+            "cvv": "081",
+            "expiry_month": "05",
+            "expiry_year":  "23"
+            """
+        data = request.data
+        serializer = serializers.FlightBookingSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        tickets = serializer.save(serializer.validated_data)
+        return Response(
+            {
+                'message': 'Ticket(s) successfully booked.',
+                'detail': serializers.TicketSerializer(tickets, many=True).data
+            },
+            status=status.HTTP_200_OK)
