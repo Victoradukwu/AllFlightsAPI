@@ -158,10 +158,16 @@ class Seat(TimeStampedModel):
 class Ticket(TimeStampedModel):
     """A model class representing a passenger ticket"""
 
+    MALE = 'Male',
+    FEMALE = 'Female'
+    GENDER_CHOICES = [(MALE, MALE), (FEMALE, FEMALE)]
     first_name = models.CharField(max_length=20)
     last_name = models.CharField(max_length=20)
+    gender = models.CharField(max_length=7)
     email = models.EmailField()
     phone = models.CharField(max_length=20)
+    contact_first_name = models.CharField(max_length=15)
+    contact_last_name = models.CharField(max_length=15)
     seat = models.OneToOneField(Seat, on_delete=models.CASCADE)
     ticket_number = models.CharField(max_length=10, null=True, blank=True, unique=True)
 
@@ -178,7 +184,7 @@ class Ticket(TimeStampedModel):
 
     def save(self, *args, **kwargs):
         if self._state.adding:
-            self.ticket_number = utils.generate_ticket_number(self.flight)
+            self.ticket_number = utils.generate_ticket_number(self.seat)
 
         super().save(*args, **kwargs)
 

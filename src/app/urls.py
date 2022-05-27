@@ -16,6 +16,9 @@ urlpatterns = [
     path('auth/change-password/', views.change_password, name='change_complete'),
     path('auth/social/<backend>/', views.exchange_token, name='social_auth'),
     path('countries/', views.CountryListView.as_view(), name='countries'),
-    path('flights/', views.FlightListView.as_view(), name='flights'),
+    path('flights/', views.FlightListView.as_view(), name='flight_list'),
+    path('flights/<pk>/', views.FlightDetailView.as_view(), name='flight_detail'),
+    path('tickets/', views.TicketListView.as_view(), name='ticket_list'),
+    path('tickets/<pk>/', views.FlightDetailView.as_view(), name='ticket_detail'),
     path('flights/recommendations/<departure_port>/<departure_date>', views.recommendations, name='recommendations')
 ]
