@@ -309,7 +309,7 @@ class FlightListView(ListCreateAPIView):
        creates a new flight object
    """
 
-    permission_classes = [IsAdminUser]
+    permission_classes = [utils.IsAdminOrReadOnly]
     serializer_class = serializers.FlightSerializer
     filterset_class = utils.FlightFilter
 
