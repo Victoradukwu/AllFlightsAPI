@@ -130,6 +130,9 @@ class FlightClass(TimeStampedModel):
     def __str__(self):
         return f"{self.flight.flight_number}-{self.class_name}"
 
+    def available_seats(self):
+        return len([seat for seat in self.seats.filter(status=Seat.AVAILABLE)])
+
 
 class Seat(TimeStampedModel):
     """A model class representing a particular seat on a particular flight"""

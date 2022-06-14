@@ -135,11 +135,21 @@ class FlightClassSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = app_models.FlightClass
-        fields = ['class_name', 'fare', 'capacity', 'seats']
+        fields = ['class_name', 'fare', 'capacity', 'seats', 'available_seats']
 
+
+class AirportSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = app_models.Airport
+        fields = '__all__'
 
 class FlightSerializer(serializers.ModelSerializer):
     carrier_name = serializers.ReadOnlyField(source='carrier.name')
+    departure_port = AirportSerializer(read_only=True)
+    destination_port = AirportSerializer(read_only=True)
+    destination_port_id = serializers.IntegerField(write_only=True)
+    departure_port_id = serializers.IntegerField(write_only=True)
     economy_capacity = serializers.IntegerField(write_only=True)
     premium_capacity = serializers.IntegerField(write_only=True)
     business_capacity = serializers.IntegerField(write_only=True)
@@ -151,17 +161,17 @@ class FlightSerializer(serializers.ModelSerializer):
     class Meta:
         model = app_models.Flight
         exclude = ['modified', 'created']
-        read_only_fields = ['flight_number']
+        read_only_fields = ['flight_number', 'departure_port', 'destination_port']
 
     def create(self, validated_data):
         flight_dict = {key: validated_data[key] for key in [
             "departure_time",
             "departure_date",
-            "departure_port",
-            "destination_port",
             "duration",
             "carrier"
         ]}
+        flight_dict['departure_port'] = app_models.Airport.objects.get(id=validated_data.get('departure_port_id'))
+        flight_dict['destination_port'] = app_models.Airport.objects.get(id=validated_data.get('destination_port_id'))
         flight = app_models.Flight.objects.create(**flight_dict)
 
         economy_class = app_models.FlightClass.objects.create(
