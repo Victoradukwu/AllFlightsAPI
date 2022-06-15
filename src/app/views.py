@@ -1,3 +1,5 @@
+import json
+import math
 import os
 import uuid
 
@@ -26,7 +28,13 @@ from . import serializers, docs, utils
 class PageSizeAndNumberPagination(PageNumberPagination):
     page_size = 20
     page_size_query_param = "page_size"
-    max_page_size = 1000
+
+    def get_paginated_response(self, data):
+        page_resp = super().get_paginated_response(data)
+        page_obj = page_resp.data
+        num_of_pages = math.ceil(page_obj['count']/self.page_size)
+        page_obj['number_of_pages'] = num_of_pages
+        return Response(page_obj)
 
 
 @swagger_auto_schema(method='post', request_body=serializers.RegisterSerializer)
