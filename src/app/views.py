@@ -312,6 +312,7 @@ class FlightListView(ListCreateAPIView):
     permission_classes = [utils.IsAdminOrReadOnly]
     serializer_class = serializers.FlightSerializer
     filterset_class = utils.FlightFilter
+    pagination_class = PageSizeAndNumberPagination
 
     def get_queryset(self):
         return Flight.objects.all()
