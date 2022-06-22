@@ -113,6 +113,7 @@ class Flight(TimeStampedModel):
 
     class Meta:
         unique_together = (('flight_number', 'departure_port'),)
+        ordering = ['-id']
 
 
 class FlightClass(TimeStampedModel):
