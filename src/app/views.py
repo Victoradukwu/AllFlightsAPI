@@ -1,6 +1,5 @@
-import json
+
 import math
-import os
 import uuid
 
 import django_filters
@@ -8,7 +7,6 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import Group, Permission
 from django.views.decorators.csrf import csrf_exempt
 from drf_yasg.utils import swagger_auto_schema
-import requests
 from requests import HTTPError
 from rest_framework import filters, generics
 from rest_framework import status
@@ -75,6 +73,16 @@ def login(request):
     data = {"user": user, "access_token": token.key}
 
     return Response(serializers.UserTokenSerializer(data).data, status=status.HTTP_200_OK)
+
+
+@swagger_auto_schema()
+@csrf_exempt
+@api_view()
+@permission_classes([AllowAny])
+def logout(request):
+    Token.objects.filter(user=request.user).delete()
+
+    return Response({'detail': 'Successfully logged out'}, status=status.HTTP_200_OK)
 
 
 @api_view()
