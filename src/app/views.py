@@ -1,5 +1,6 @@
 
 import math
+import os
 import uuid
 
 import django_filters
@@ -88,6 +89,7 @@ def logout(request):
 @permission_classes([AllowAny])
 def initiate_password_reset(request, email):
     user = User.objects.filter(email=email).first()
+    frontend_url = os.getenv('FRONTEND_URL')
     if user:
         token = uuid.uuid4().hex
         PasswordResetToken.objects.create(user=user, key=token, status='Active')
@@ -99,7 +101,7 @@ def initiate_password_reset(request, email):
                      f'<p>Hi {user.first_name},</p>' \
                      f'<p>You requested for a password reset on <b>Allflights</b></p>' \
                      f'<p>Kindly click on the link below to reset your password</p>' \
-                     f'<a href="https:www.allflights.com/auth/password-reset/{token}">Reset password</a>' \
+                     f'<a href="{frontend_url}/{token}">Reset password</a>' \
                      f'</body>' \
                      f'</html>'
 
