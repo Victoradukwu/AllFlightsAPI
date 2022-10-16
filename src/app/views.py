@@ -75,7 +75,6 @@ def login(request):
     return Response(serializers.UserTokenSerializer(data).data, status=status.HTTP_200_OK)
 
 
-@swagger_auto_schema()
 @csrf_exempt
 @api_view()
 @permission_classes([AllowAny])
