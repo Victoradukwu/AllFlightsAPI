@@ -60,8 +60,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_roles(instance):
-        serializer = GroupSerializer(instance.groups.all(), many=True).data
-        return serializer
+        roles = [role.name for role in instance.groups.all()]
+        return roles
 
 
 class UserTokenSerializer(serializers.Serializer):
