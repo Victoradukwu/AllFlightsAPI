@@ -53,10 +53,11 @@ class PermissionSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     roles = serializers.SerializerMethodField()
     country = CountrySerializer(read_only=True)
+    avatar = VersatileImageFieldSerializer(read_only=True, allow_null=True, sizes='all_image_size')
 
     class Meta:
         model = app_models.User
-        fields = ('id', 'first_name', 'last_name', 'email', 'phone_number', 'roles', 'country')
+        fields = ['id', 'first_name', 'last_name', 'email', 'phone_number', 'roles', 'country', 'avatar']
 
     @staticmethod
     def get_roles(instance):
@@ -86,9 +87,8 @@ class RegisterSerializer(serializers.Serializer):
     last_name = serializers.CharField()
     password = serializers.CharField()
     confirm_password = serializers.CharField()
-    avatar = VersatileImageFieldSerializer(required=False, allow_null=True, sizes='all_image_size')
-    country = serializers.IntegerField()
-    state = serializers.IntegerField()
+    country = serializers.IntegerField(required=False)
+    avatar_file = serializers.FileField(required=False, write_only=True)
 
     class Meta:
         fields = UserSerializer.Meta.fields
@@ -98,11 +98,13 @@ class RegisterSerializer(serializers.Serializer):
             raise ValidationError('Password and Confirm password must be the same.')
         if 'country' in attrs:
             attrs['country'] = app_models.Country.objects.get(pk=attrs.pop('country'))
+        if 'avatar_file' in attrs:
+            attrs['avatar'] = attrs.pop('avatar_file')
         super().validate(attrs)
         return attrs
 
     def create(self, validated_data):
-        role = validated_data.pop('role')
+        role = validated_data.pop('role', None)
         _ = validated_data.pop('confirm_password')
         user = app_models.User.objects.create_user(**validated_data)
         if role:

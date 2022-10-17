@@ -62,7 +62,8 @@ class AppUserAdmin(UserAdmin):
                                 'is_active',
                                 'is_superuser',
                                 'groups',
-                                'user_permissions'
+                                'user_permissions',
+                                'avatar'
                             )
                         }
                     ),

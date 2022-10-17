@@ -50,7 +50,7 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     phone_number = models.CharField(max_length=20, null=True, blank=True, unique=True)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
-    avatar = VersatileImageField('guardian_avatar', null=True, blank=True, upload_to=path_and_filename)
+    avatar = VersatileImageField('avatar', null=True, blank=True, upload_to=path_and_filename)
     country = models.ForeignKey('Country', on_delete=models.SET_NULL, null=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)

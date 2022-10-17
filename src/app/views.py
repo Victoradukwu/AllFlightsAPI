@@ -7,6 +7,7 @@ import django_filters
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import Group, Permission
 from django.views.decorators.csrf import csrf_exempt
+from djangorestframework_camel_case.parser import CamelCaseFormParser, CamelCaseMultiPartParser
 from drf_yasg.utils import swagger_auto_schema
 from requests import HTTPError
 from rest_framework import filters, generics
@@ -15,7 +16,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.parsers import FormParser
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from social_django.utils import psa
@@ -38,6 +39,7 @@ class PageSizeAndNumberPagination(PageNumberPagination):
 
 @swagger_auto_schema(method='post', request_body=serializers.RegisterSerializer)
 @api_view(['POST'])
+@parser_classes([CamelCaseFormParser, CamelCaseMultiPartParser])
 @permission_classes([AllowAny])
 def register(request):
     serializer = serializers.RegisterSerializer(data=request.data)
@@ -101,7 +103,7 @@ def initiate_password_reset(request, email):
                      f'<p>Hi {user.first_name},</p>' \
                      f'<p>You requested for a password reset on <b>Allflights</b></p>' \
                      f'<p>Kindly click on the link below to reset your password</p>' \
-                     f'<a href="{frontend_url}/{token}">Reset password</a>' \
+                     f'<a href="{frontend_url}?token={token}">Reset password</a>' \
                      f'</body>' \
                      f'</html>'
 
