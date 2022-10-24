@@ -20,7 +20,7 @@ from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from social_django.utils import psa
 
-from .models import User, Country, Flight, PasswordResetToken, Ticket
+from .models import User, Country, Flight, PasswordResetToken, Ticket, Airport, Carrier
 from . import serializers, docs, utils
 
 
@@ -444,3 +444,29 @@ class TicketListView(generics.ListCreateAPIView):
                 'detail': serializers.TicketSerializer(tickets, many=True).data
             },
             status=status.HTTP_200_OK)
+
+
+class AirportListView(ListAPIView):
+    """
+       get:
+       Return a list of airport objects
+
+    """
+    permission_classes = [AllowAny]
+    serializer_class = serializers.AirportSerializer
+
+    def get_queryset(self):
+        return Airport.objects.all()
+
+
+class CarrierListView(ListAPIView):
+    """
+       get:
+       Return a list of carrier objects
+
+    """
+    permission_classes = [AllowAny]
+    serializer_class = serializers.CarrierSerializer
+
+    def get_queryset(self):
+        return Carrier.objects.all()

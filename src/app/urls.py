@@ -21,5 +21,7 @@ urlpatterns = [
     path('flights/<pk>/', views.FlightDetailView.as_view(), name='flight_detail'),
     path('tickets/', views.TicketListView.as_view(), name='ticket_list'),
     path('tickets/<pk>/', views.FlightDetailView.as_view(), name='ticket_detail'),
-    path('flights/recommendations/<departure_port>/<departure_date>', views.recommendations, name='recommendations')
+    path('flights/recommendations/<departure_port>/<departure_date>', views.recommendations, name='recommendations'),
+    path('carriers/', views.CarrierListView.as_view(), name='carriers'),
+    path('airports/', views.AirportListView.as_view(), name='airports'),
 ]

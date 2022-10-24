@@ -363,3 +363,10 @@ class TicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = app_models.Ticket
         fields = '__all__'
+
+
+class CarrierSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = app_models.Carrier
+        fields = '__all__'
