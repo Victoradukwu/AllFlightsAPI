@@ -147,7 +147,7 @@ class Seat(TimeStampedModel):
     CLASS_CHOICES = [(ECONOMY, ECONOMY), (PREMIUM, PREMIUM), (BUSINESS, BUSINESS)]
 
     seat_number = models.CharField(max_length=20, unique=True)
-    flight_class = models.ForeignKey(FlightClass, related_name='seats', on_delete=models.SET_NULL, null=True)
+    flight_class = models.ForeignKey(FlightClass, related_name='seats', on_delete=models.CASCADE, null=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=AVAILABLE)
 
     def __str__(self):
