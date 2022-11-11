@@ -239,7 +239,7 @@ class CountryListView(ListAPIView):
        Return a list of country objects
 
     """
-    permission_classes = [IsAdminUser]
+    # permission_classes = [IsAdminUser]
     serializer_class = serializers.CountrySerializer
 
     def get_queryset(self):

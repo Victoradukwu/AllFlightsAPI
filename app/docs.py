@@ -1,7 +1,4 @@
-import json
-
 from drf_yasg.inspectors import SwaggerAutoSchema
-from drf_yasg.openapi import Parameter, IN_QUERY
 
 from . import serializers
 

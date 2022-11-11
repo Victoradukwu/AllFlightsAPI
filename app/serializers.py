@@ -1,10 +1,7 @@
-import json
-
 from django.contrib.auth.models import Group, Permission
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
-from versatileimagefield.serializers import VersatileImageFieldSerializer
 
 from . import models as app_models, utils
 
