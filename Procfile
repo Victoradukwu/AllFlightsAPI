@@ -1,2 +1,2 @@
-web: gunicorn --chdir src AllFlights.wsgi
+web: daphne AllFlights.asgi
 release: python manage.py migrate
