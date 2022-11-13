@@ -95,7 +95,7 @@ class FlightAdmin(admin.ModelAdmin):
 
 @admin.register(Seat)
 class SeatAdmin(admin.ModelAdmin):
-    list_display = ['seat_number', 'flight_class', 'status', 'created', 'modified']
+    list_display = ['seat_number', 'flight_class', 'status', 'flight_class', 'created', 'modified']
     search_fields = ['seat_number', 'flight_class__class_name', 'status']
     ordering = ["-created"]
     list_filter = ['flight_class', 'flight_class__flight', 'status']

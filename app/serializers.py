@@ -1,4 +1,5 @@
 from django.contrib.auth.models import Group, Permission
+from django.db import transaction
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
@@ -300,6 +301,7 @@ class FlightBookingSerializer(serializers.Serializer):
     passengers = PassenegrSerializer(many=True)
     payment_card = PaymentCardSerilaizer()
 
+    @transaction.atomic()
     def save(self, validated_data):
         flight_number = validated_data.get('flight_number')
         passenger_count = validated_data.get('passenger_count')
@@ -320,6 +322,10 @@ class FlightBookingSerializer(serializers.Serializer):
         if available_seats.count() < passenger_count:
             raise ValidationError('Available seats are fewer than the your requested number of tickets.')
 
+        selected_seats = available_seats[:passenger_count]
+        for seat in selected_seats:
+            seat.status = app_models.Seat.BOOKED
+            seat.save()
         payment_data = {
             "email": contact_email,
             "amount": str(flight_class.fare * passenger_count*100),
@@ -329,9 +335,10 @@ class FlightBookingSerializer(serializers.Serializer):
 
         pay_resp = utils.make_payment(payment_data)
         tickets = []
-        if pay_resp['data']['status'] == 'success':
+        print('KKKKKK', pay_resp)
+        if pay_resp['status'] is True:
             for num in range(passenger_count):
-                seat = available_seats[num]
+                seat = selected_seats[num]
                 passenger = passengers[num]
                 ticket = app_models.Ticket.objects.create(
                     first_name=passenger.get('first_name'),
@@ -345,7 +352,7 @@ class FlightBookingSerializer(serializers.Serializer):
                 )
                 tickets.append(ticket)
         else:
-            raise ValidationError('Payment failed.')
+            raise ValidationError(f'Payment failed: {pay_resp.get("message")}')
         return tickets
 
 
