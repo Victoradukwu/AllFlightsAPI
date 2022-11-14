@@ -3,6 +3,7 @@ from django.db import transaction
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
+from versatileimagefield.serializers import VersatileImageFieldSerializer
 
 from . import models as app_models, utils
 
@@ -51,11 +52,11 @@ class PermissionSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     roles = serializers.SerializerMethodField()
     country = CountrySerializer(read_only=True)
-    # avatar = VersatileImageFieldSerializer(read_only=True, allow_null=True, sizes='all_image_size')
+    avatar = VersatileImageFieldSerializer(read_only=True, allow_null=True, sizes='all_image_size')
 
     class Meta:
         model = app_models.User
-        fields = ['id', 'first_name', 'last_name', 'email', 'phone_number', 'roles', 'country']
+        fields = ['id', 'first_name', 'last_name', 'email', 'phone_number', 'roles', 'country', 'avatar']
 
     @staticmethod
     def get_roles(instance):
