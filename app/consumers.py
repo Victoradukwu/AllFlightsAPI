@@ -1,15 +1,10 @@
-import os
 
-import django
 from djangochannelsrestframework.generics import GenericAsyncAPIConsumer
 from djangochannelsrestframework.observer import model_observer
 from djangochannelsrestframework.decorators import action
 
 from .serializers import FlightSerializer
 from .models import Flight, Seat
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'AllFlights.settings')
-django.setup()
 
 
 class TicketBookedConsumer(GenericAsyncAPIConsumer):
