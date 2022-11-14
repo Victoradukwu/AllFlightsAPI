@@ -161,22 +161,22 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
-# if ENVIRONMENT in ['production', 'staging']:
-#     DEFAULT_FILE_STORAGE = 'AllFlights.s3utils.MediaRootS3Boto3Storage'
-#
-#     AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
-#     AWS_REGION = os.getenv('AWS_REGION')
-#     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
-#     AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-#     AWS_QUERYSTRING_AUTH = False
-#
-#     from boto3.session import Session
-#
-#     BOTO3_SESSION = Session(
-#         aws_access_key_id=AWS_ACCESS_KEY_ID,
-#         aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-#         region_name=AWS_REGION,
-#     )
+if ENVIRONMENT in ['production', 'staging']:
+    DEFAULT_FILE_STORAGE = 'AllFlights.s3utils.MediaRootS3Boto3Storage'
+
+    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+    AWS_REGION = os.getenv('AWS_REGION')
+    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+    AWS_QUERYSTRING_AUTH = False
+
+    from boto3.session import Session
+
+    BOTO3_SESSION = Session(
+        aws_access_key_id=AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+        region_name=AWS_REGION,
+    )
 
 VERSATILEIMAGEFIELD_SETTINGS = {
     # cache day in seconds
