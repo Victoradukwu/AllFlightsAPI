@@ -1,48 +1,19 @@
 version: 2.1
 
 orbs:
-  aws-cli: circleci/aws-cli@2.0.6
-  python: circleci/python@1.5.0
-  aws-ecr: circleci/aws-ecr@7.3.0
-
-jobs:
-  deploy:
-    docker:
-      - image: cimg/python:3.8
-    steps:
-      - run:
-          name: AWS Deployment
-          command: |
-            ssh -o StrictHostKeyChecking=no ubuntu@$EC2_PUBLIC_IP "cd allflights && aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_ID && docker pull $ECR_ID/$ALLFLIGHTS_REPO:latest && docker pull $ECR_ID/$RECOMMENDATIONS_REPO:latest && docker-compose up -d"
+  python: circleci/python@2.1.1
+  eb: circleci/aws-elastic-beanstalk@1.0.0
 
 workflows:
   main_workflow:
     jobs:
-      - python/test:
-          test-tool: pytest
-      - aws-ecr/build-and-push-image:
-          name: "allflights_build"
-          repo: $ALLFLIGHTS_REPO
-          path: "src/"
-          filters:
-            branches:
-              only: master
-          requires:
-            - python/test
-      - aws-ecr/build-and-push-image:
-          name: "recommendations_build"
-          repo: $RECOMMENDATIONS_REPO
-          path: "recommendations/"
-          filters:
-            branches:
-              only: master
-          requires:
-            - python/test
-      - deploy:
-          requires:
-            - allflights_build
-            - recommendations_build
-          filters:
-            branches:
-              only: master
-
+      - python/test
+      - eb/deploy:
+            context: aws-creds
+            environment-name: allflights-staging
+            filters:
+              branches:
+                only:
+                  - staging
+            requires:
+              - python/test
