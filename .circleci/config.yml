@@ -10,7 +10,7 @@ workflows:
       - python/test
       - eb/deploy:
             context: aws-creds
-            environment-name: allflights-staging
+            environment-name: allflightsapi-staging
             filters:
               branches:
                 only:
