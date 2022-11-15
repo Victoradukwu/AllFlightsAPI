@@ -15,5 +15,6 @@ workflows:
               branches:
                 only:
                   - staging
+            label: version-<<pipeline.number>>
             requires:
               - python/test
