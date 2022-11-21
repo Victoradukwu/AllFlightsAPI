@@ -287,8 +287,8 @@ class PaymentCardSerilaizer(serializers.Serializer):
     number = serializers.CharField(max_length=20)
     cvv = serializers.CharField(max_length=3)
     card_pin = serializers.CharField(max_length=6)
-    expiry_month = serializers.CharField(max_length=12)
-    expiry_year = serializers.CharField(max_length=2)
+    expiry_month = serializers.CharField(max_length=2)
+    expiry_year = serializers.CharField(max_length=4)
 
 
 class FlightBookingSerializer(serializers.Serializer):
@@ -298,7 +298,7 @@ class FlightBookingSerializer(serializers.Serializer):
     contact_first_name = serializers.CharField(max_length=15)
     contact_last_name = serializers.CharField(max_length=15)
     contact_phone = serializers.CharField(max_length=15)
-    contact_email = serializers.CharField(max_length=15)
+    contact_email = serializers.CharField(max_length=50)
     passengers = PassenegrSerializer(many=True)
     payment_card = PaymentCardSerilaizer()
 
