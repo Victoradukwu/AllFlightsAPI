@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 
 
 class Command(BaseCommand):
+    help = 'Creates the first super user'
 
     def handle(self, *args, **options):
         if not User.objects.filter(email="victor@allflights.com").exists():
