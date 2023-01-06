@@ -1,2 +1,1 @@
-web: daphne -b 0.0.0.0 -p $PORT AllFlights.asgi:application
-release: python manage.py migrate
+web: gunicorn --bind :8000 --workers 3 --threads 2 AllFlights.wsgi:application

@@ -17,8 +17,8 @@ ALLOWED_HOSTS = ['*']
 AUTH_USER_MODEL = 'app.User'
 
 INSTALLED_APPS = [
-    'daphne',
-    'channels',
+    # 'daphne',
+    # 'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -107,8 +107,8 @@ TEMPLATES = [
     },
 ]
 
-# WSGI_APPLICATION = 'AllFlights.wsgi.application'
-ASGI_APPLICATION = 'AllFlights.asgi.application'
+WSGI_APPLICATION = 'AllFlights.wsgi.application'
+# ASGI_APPLICATION = 'AllFlights.asgi.application'
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
