@@ -7,5 +7,5 @@ class Command(BaseCommand):
     help = 'Creates the first super user'
 
     def handle(self, *args, **options):
-        if not User.objects.filter(email="victordude@allflights.com").exists():
-            User.objects.create_superuser("victordude@allflights.com", "abc123")
+        if not User.objects.filter(email="johnny@allflights.com").exists():
+            User.objects.create_superuser("johnny@allflights.com", "abc123")
